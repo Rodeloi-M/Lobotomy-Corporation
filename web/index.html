@@ -1,11 +1,123 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <title>Lobotomy Corporation Wiki</title>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    </head>
-    <body>
-        <div>TODO write content</div>
-    </body>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lobotomy Corporation Wiki</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* override for shell page — no iframe, direct layout */
+    body { overflow: hidden; }
+    #frame {
+      position: fixed;
+      top: var(--header-h);
+      left: var(--sidebar-w);
+      right: 0;
+      bottom: 0;
+      border: none;
+      background: var(--bg-main);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOP HEADER -->
+  <header class="top-header">
+    <form class="search-bar" action="pesquisa.jsp" method="get" target="frame">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+      <input type="text" name="nome" placeholder="Search abnormalities…">
+    </form>
+    <div class="header-actions">
+      <a class="btn-add" href="inserir.jsp" target="frame">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path d="M12 5v14M5 12h14"/>
+        </svg>
+        Add Entry
+      </a>
+    </div>
+  </header>
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-title">Lobotomy Corp</div>
+      <div class="logo-sub">Abnormality Archive</div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Navigation</div>
+      <a onclick="load('home.jsp')" class="active" id="nav-home">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M3 12l9-9 9 9M5 10v10h5v-5h4v5h5V10"/>
+        </svg>
+        Home
+      </a>
+      <a onclick="load('abnormalities.jsp')" id="nav-all">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
+        </svg>
+        All Abnormalities
+      </a>
+      <a onclick="load('pesquisa.jsp')" id="nav-search">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+        Search
+      </a>
+      <a onclick="load('inserir.jsp')" id="nav-add">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/>
+        </svg>
+        Add Abnormality
+      </a>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Filter by Risk</div>
+    </div>
+    <div class="risk-filters">
+      <a class="risk-link" onclick="load('abnormalities.jsp?risk=ZAYIN')">
+        <span class="risk-dot" style="background:var(--zayin)"></span> ZAYIN
+      </a>
+      <a class="risk-link" onclick="load('abnormalities.jsp?risk=TETH')">
+        <span class="risk-dot" style="background:var(--teth)"></span> TETH
+      </a>
+      <a class="risk-link" onclick="load('abnormalities.jsp?risk=HE')">
+        <span class="risk-dot" style="background:var(--he)"></span> HE
+      </a>
+      <a class="risk-link" onclick="load('abnormalities.jsp?risk=WAW')">
+        <span class="risk-dot" style="background:var(--waw)"></span> WAW
+      </a>
+      <a class="risk-link" onclick="load('abnormalities.jsp?risk=ALEPH')">
+        <span class="risk-dot" style="background:var(--aleph)"></span> ALEPH
+      </a>
+    </div>
+
+    <div class="sidebar-footer">
+      Lobotomy Corporation Wiki<br>
+      Fan Database Project
+    </div>
+  </nav>
+
+  <!-- IFRAME CONTENT -->
+  <iframe id="frame" name="frame" src="home.jsp"></iframe>
+
+  <script>
+    function load(page) {
+      document.getElementById('frame').src = page;
+      // update active state
+      ['home','all','search','add'].forEach(id => {
+        document.getElementById('nav-' + id)?.classList.remove('active');
+      });
+      if (page.startsWith('home'))              document.getElementById('nav-home')?.classList.add('active');
+      else if (page.startsWith('abnormalities')) document.getElementById('nav-all')?.classList.add('active');
+      else if (page.startsWith('pesquisa'))      document.getElementById('nav-search')?.classList.add('active');
+      else if (page.startsWith('inserir'))       document.getElementById('nav-add')?.classList.add('active');
+    }
+  </script>
+</body>
 </html>

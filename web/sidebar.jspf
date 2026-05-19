@@ -1,0 +1,55 @@
+<%-- sidebar.jspf - include em todas as páginas com <%@include file="sidebar.jspf"%> --%>
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-title">Lobotomy Corp</div>
+    <div class="logo-sub">Abnormality Archive</div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Navigation</div>
+    <a href="index.html" onclick="return true;">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12l9-9 9 9M5 10v10h5v-5h4v5h5V10"/></svg>
+      Home
+    </a>
+    <a href="abnormalities.jsp">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+      All Abnormalities
+    </a>
+    <a href="pesquisa.jsp">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      Search
+    </a>
+    <a href="inserir.jsp">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+      Add Abnormality
+    </a>
+  </div>
+
+  <div class="sidebar-divider"></div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Filter by Risk</div>
+  </div>
+  <div class="risk-filters">
+    <a class="risk-link" href="abnormalities.jsp?risk=ZAYIN">
+      <span class="risk-dot" style="background:var(--zayin)"></span> ZAYIN
+    </a>
+    <a class="risk-link" href="abnormalities.jsp?risk=TETH">
+      <span class="risk-dot" style="background:var(--teth)"></span> TETH
+    </a>
+    <a class="risk-link" href="abnormalities.jsp?risk=HE">
+      <span class="risk-dot" style="background:var(--he)"></span> HE
+    </a>
+    <a class="risk-link" href="abnormalities.jsp?risk=WAW">
+      <span class="risk-dot" style="background:var(--waw)"></span> WAW
+    </a>
+    <a class="risk-link" href="abnormalities.jsp?risk=ALEPH">
+      <span class="risk-dot" style="background:var(--aleph)"></span> ALEPH
+    </a>
+  </div>
+
+  <div class="sidebar-footer">
+    Lobotomy Corporation Wiki<br>
+    Fan Database Project
+  </div>
+</div>
