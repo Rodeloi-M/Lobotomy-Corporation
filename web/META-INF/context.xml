@@ -1,2 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Context path="/Lobotomy_Corporation"/>
+<!--
+  context.xml — Configuração do DataSource JDBC para Tomcat
+  Lobotomy Corporation Wiki — Projeto Académico
+
+  Colocar este ficheiro em:
+    - web/META-INF/context.xml  (para deploy local no NetBeans/Tomcat)
+    - $TOMCAT_HOME/conf/context.xml  (para configuração global)
+
+  Dependência necessária no classpath do Tomcat:
+    mysql-connector-j-8.x.x.jar  ->  $TOMCAT_HOME/lib/
+-->
+<Context>
+    <Resource name="jdbc/lobotomyCorp"
+              auth="Container"
+              type="javax.sql.DataSource"
+              maxTotal="20"
+              maxIdle="10"
+              maxWaitMillis="10000"
+              username="root"
+              password=""
+              driverClassName="com.mysql.cj.jdbc.Driver"
+              url="jdbc:mysql://localhost:3306/lobotomy_corp?useSSL=false&amp;serverTimezone=UTC&amp;characterEncoding=UTF-8"/>
+</Context>

@@ -1,123 +1,992 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lobotomy Corporation Wiki</title>
   <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☣</text></svg>">
   <style>
-    /* override for shell page — no iframe, direct layout */
-    body { overflow: hidden; }
-    #frame {
-      position: fixed;
-      top: var(--header-h);
-      left: var(--sidebar-w);
-      right: 0;
-      bottom: 0;
+    /* ── WIKI LAYOUT (Fandom-style) ── */
+    .wiki-root {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* TOP BAR */
+    .topbar {
+      background: #0a0a0f;
+      border-bottom: 1px solid #1e1e2e;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      gap: 20px;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--text-dim);
+      letter-spacing: 1.5px;
+    }
+    .topbar span { color: var(--text-dim); }
+    .topbar a { color: var(--text-muted); text-decoration: none; transition: color .2s; }
+    .topbar a:hover { color: var(--accent-yellow); }
+    .topbar .sep { color: #2a2a3e; }
+
+    /* MAIN HEADER */
+    .wiki-header {
+      background: var(--bg-panel);
+      border-bottom: 3px solid var(--accent-yellow);
+      box-shadow: 0 2px 30px rgba(245,197,24,0.12);
+      position: sticky;
+      top: 0;
+      z-index: 200;
+    }
+
+    .wiki-header-inner {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      height: 64px;
+      gap: 20px;
+    }
+
+    .wiki-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      flex-shrink: 0;
+    }
+
+    .wiki-logo-hex {
+      width: 40px;
+      height: 40px;
+      background: var(--accent-yellow);
+      clip-path: polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      animation: pulse-hex 3s ease-in-out infinite;
+    }
+
+    .wiki-logo-text { line-height: 1.1; }
+    .wiki-logo-name {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--accent-yellow);
+      letter-spacing: 1px;
+    }
+    .wiki-logo-sub {
+      font-family: var(--font-mono);
+      font-size: 0.52rem;
+      color: var(--text-muted);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+
+    /* SEARCH BAR */
+    .wiki-search {
+      flex: 1;
+      max-width: 500px;
+      position: relative;
+    }
+    .wiki-search input {
+      width: 100%;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      font-family: var(--font-ui);
+      font-size: 0.9rem;
+      padding: 8px 40px 8px 14px;
+      outline: none;
+      transition: border-color .2s;
+    }
+    .wiki-search input:focus { border-color: var(--accent-yellow); }
+    .wiki-search input::placeholder { color: var(--text-dim); }
+    .wiki-search-btn {
+      position: absolute;
+      right: 0; top: 0; bottom: 0;
+      width: 38px;
+      background: var(--accent-yellow);
       border: none;
-      background: var(--bg-main);
+      cursor: pointer;
+      color: #000;
+      font-size: 0.9rem;
+      transition: background .2s;
+    }
+    .wiki-search-btn:hover { background: #d4a800; }
+
+    /* HEADER NAV */
+    .wiki-header-nav {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      margin-left: auto;
+    }
+    .wiki-header-nav a {
+      font-family: var(--font-ui);
+      font-weight: 600;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      padding: 6px 12px;
+      border: 1px solid transparent;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      transition: all .2s;
+      cursor: pointer;
+      background: none;
+    }
+    .wiki-header-nav a:hover,
+    .wiki-header-nav a.active {
+      color: var(--accent-yellow);
+      border-color: rgba(245,197,24,.3);
+      background: rgba(245,197,24,.05);
+    }
+
+    /* ── BODY LAYOUT ── */
+    .wiki-body {
+      display: flex;
+      flex: 1;
+      max-width: 1600px;
+      margin: 0 auto;
+      width: 100%;
+      gap: 0;
+    }
+
+    /* LEFT SIDEBAR */
+    .wiki-sidebar {
+      width: 240px;
+      flex-shrink: 0;
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border-color);
+      padding: 20px 0;
+      min-height: calc(100vh - 100px);
+    }
+
+    .sidebar-section { margin-bottom: 28px; }
+
+    .sidebar-section-title {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--accent-yellow);
+      padding: 0 16px 8px;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 6px;
+    }
+
+    .sidebar-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 16px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-family: var(--font-ui);
+      font-size: 0.85rem;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+      transition: all .15s;
+      cursor: pointer;
+      border-left: 3px solid transparent;
+      background: none;
+      border-top: none;
+      border-right: none;
+      border-bottom: none;
+      width: 100%;
+      text-align: left;
+    }
+    .sidebar-link:hover {
+      color: var(--accent-yellow);
+      background: rgba(245,197,24,.05);
+      border-left-color: rgba(245,197,24,.4);
+    }
+    .sidebar-link.active {
+      color: var(--accent-yellow);
+      background: rgba(245,197,24,.08);
+      border-left-color: var(--accent-yellow);
+    }
+    .sidebar-link .link-icon { font-size: 0.9rem; width: 18px; text-align: center; }
+
+    .sidebar-risk-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-family: var(--font-ui);
+      font-size: 0.82rem;
+      transition: color .15s;
+      cursor: pointer;
+      background: none;
+      border: none;
+      width: 100%;
+      text-align: left;
+    }
+    .sidebar-risk-item:hover { color: var(--accent-white); }
+    .risk-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* ── MAIN CONTENT AREA ── */
+    .wiki-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      background: var(--bg-primary);
+    }
+
+    /* HERO BANNER */
+    .wiki-hero {
+      position: relative;
+      height: 320px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-primary);
+    }
+
+    .wiki-hero-bg {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 70% 80% at 50% 50%, rgba(245,197,24,.07) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 50% at 15% 80%, rgba(192,57,43,.09) 0%, transparent 60%),
+        radial-gradient(ellipse 35% 40% at 85% 20%, rgba(0,212,212,.06) 0%, transparent 60%);
+      animation: hero-glow 6s ease-in-out infinite alternate;
+    }
+
+    .wiki-hero-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--border-color) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border-color) 1px, transparent 1px);
+      background-size: 50px 50px;
+      opacity: 0.25;
+    }
+
+    .wiki-hero-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding: 20px;
+      animation: fadeInUp .8s ease both;
+    }
+
+    .wiki-hero-badge {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      letter-spacing: 4px;
+      color: var(--accent-cyan);
+      border: 1px solid rgba(0,212,212,.3);
+      display: inline-block;
+      padding: 4px 14px;
+      margin-bottom: 14px;
+    }
+
+    .wiki-hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 5vw, 4rem);
+      color: var(--accent-yellow);
+      letter-spacing: 4px;
+      line-height: 1;
+      text-shadow: var(--glow-yellow);
+      margin-bottom: 8px;
+    }
+
+    .wiki-hero-sub {
+      font-family: var(--font-display);
+      font-size: clamp(0.75rem, 2vw, 1rem);
+      color: var(--text-muted);
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      margin-bottom: 18px;
+    }
+
+    .wiki-hero-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    /* NAV TABS (below hero, above iframe) */
+    .wiki-tabs {
+      background: var(--bg-panel);
+      border-bottom: 2px solid var(--border-color);
+      display: flex;
+      align-items: stretch;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .wiki-tabs::-webkit-scrollbar { display: none; }
+
+    .wiki-tab {
+      font-family: var(--font-ui);
+      font-weight: 600;
+      font-size: 0.8rem;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      padding: 14px 22px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: all .2s;
+      white-space: nowrap;
+      position: relative;
+      bottom: -2px;
+    }
+    .wiki-tab:hover { color: var(--accent-yellow); background: rgba(245,197,24,.04); }
+    .wiki-tab.active {
+      color: var(--accent-yellow);
+      border-bottom-color: var(--accent-yellow);
+      background: rgba(245,197,24,.06);
+    }
+
+    /* IFRAME CONTAINER */
+    .wiki-iframe-wrap {
+      flex: 1;
+      position: relative;
+      background: var(--bg-primary);
+    }
+
+    #wiki-iframe {
+      width: 100%;
+      border: none;
+      display: block;
+      min-height: 700px;
+      background: transparent;
+    }
+
+    /* INFO PANELS (home content shown when no iframe) */
+    .wiki-home-content {
+      padding: 30px;
+    }
+
+    .wiki-info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin-bottom: 30px;
+    }
+
+    .wiki-info-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      padding: 20px;
+      transition: all .2s;
+    }
+    .wiki-info-card:hover {
+      border-color: rgba(245,197,24,.4);
+      transform: translateY(-2px);
+    }
+    .wiki-info-card h3 {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      color: var(--accent-yellow);
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+    .wiki-info-card p {
+      color: var(--text-muted);
+      font-size: 0.87rem;
+      line-height: 1.7;
+    }
+
+    .risk-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 30px;
+    }
+    .risk-table th {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--accent-yellow);
+      padding: 10px 14px;
+      text-align: left;
+      background: var(--bg-panel);
+      border-bottom: 2px solid var(--accent-yellow);
+    }
+    .risk-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 0.88rem;
+      color: var(--text-primary);
+    }
+    .risk-table tr:hover td { background: rgba(245,197,24,.03); }
+
+    .lore-quote {
+      background: var(--bg-card);
+      border-left: 3px solid var(--accent-red);
+      padding: 20px 24px;
+      font-style: italic;
+      color: var(--text-muted);
+      font-size: 0.92rem;
+      line-height: 1.9;
+      margin-bottom: 30px;
+    }
+    .lore-quote cite {
+      display: block;
+      margin-top: 10px;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--text-dim);
+      letter-spacing: 1px;
+      font-style: normal;
+    }
+
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+      margin-bottom: 30px;
+    }
+    .stat-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-left: 3px solid var(--accent-yellow);
+      padding: 16px;
+      text-align: center;
+    }
+    .stat-box .num {
+      font-family: var(--font-mono);
+      font-size: 1.8rem;
+      color: var(--accent-yellow);
+      display: block;
+    }
+    .stat-box .lbl {
+      font-size: 0.7rem;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    /* RIGHT SIDEBAR */
+    .wiki-right-sidebar {
+      width: 220px;
+      flex-shrink: 0;
+      background: var(--bg-secondary);
+      border-left: 1px solid var(--border-color);
+      padding: 20px 0;
+    }
+
+    .right-section { margin-bottom: 24px; }
+    .right-section-title {
+      font-family: var(--font-mono);
+      font-size: 0.58rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--accent-cyan);
+      padding: 0 14px 8px;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 8px;
+    }
+
+    .right-item {
+      padding: 7px 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: color .15s;
+      text-decoration: none;
+      background: none;
+      border: none;
+      width: 100%;
+      text-align: left;
+    }
+    .right-item:hover { color: var(--accent-yellow); }
+
+    /* FOOTER */
+    .wiki-footer {
+      background: var(--bg-panel);
+      border-top: 1px solid var(--border-color);
+      padding: 30px 20px;
+    }
+    .wiki-footer-inner {
+      max-width: 1600px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 30px;
+    }
+    .wiki-footer h4 {
+      font-family: var(--font-display);
+      font-size: 0.85rem;
+      color: var(--accent-yellow);
+      letter-spacing: 2px;
+      margin-bottom: 12px;
+    }
+    .wiki-footer a {
+      display: block;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.82rem;
+      padding: 3px 0;
+      transition: color .15s;
+    }
+    .wiki-footer a:hover { color: var(--accent-yellow); }
+    .wiki-footer-bottom {
+      max-width: 1600px;
+      margin: 20px auto 0;
+      padding-top: 16px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .wiki-footer-bottom p {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--text-dim);
+      letter-spacing: 1px;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 1100px) {
+      .wiki-right-sidebar { display: none; }
+    }
+    @media (max-width: 780px) {
+      .wiki-sidebar { display: none; }
+      .wiki-hero { height: 240px; }
+    }
+    @media (max-width: 500px) {
+      .wiki-header-nav { display: none; }
+      .wiki-search { max-width: 200px; }
     }
   </style>
 </head>
 <body>
+<div class="wiki-root">
 
-  <!-- TOP HEADER -->
-  <header class="top-header">
-    <form class="search-bar" action="pesquisa.jsp" method="get" target="frame">
-      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-      </svg>
-      <input type="text" name="nome" placeholder="Search abnormalities…">
-    </form>
-    <div class="header-actions">
-      <a class="btn-add" href="inserir.jsp" target="frame">
-        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-          <path d="M12 5v14M5 12h14"/>
-        </svg>
-        Add Entry
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <span>☣ LOBOTOMY CORP. INTERNAL NETWORK</span>
+    <span class="sep">|</span>
+    <a href="#" onclick="loadPage('listar.jsp');return false;">Base de Dados</a>
+    <span class="sep">|</span>
+    <a href="#" onclick="loadPage('filtrar.jsp');return false;">Pesquisa</a>
+    <span class="sep">|</span>
+    <a href="#" onclick="loadPage('form.jsp');return false;">Gestão</a>
+    <div style="margin-left:auto;color:var(--text-dim)" id="clock"></div>
+  </div>
+
+  <!-- MAIN HEADER -->
+  <header class="wiki-header">
+    <div class="wiki-header-inner">
+      <a href="index.html" class="wiki-logo" onclick="showHome();return false;">
+        <div class="wiki-logo-hex">☣</div>
+        <div class="wiki-logo-text">
+          <div class="wiki-logo-name">Lobotomy Corp.</div>
+          <div class="wiki-logo-sub">Abnormality Wiki</div>
+        </div>
       </a>
+
+      <div class="wiki-search">
+        <input type="text" id="searchInput" placeholder="Pesquisar anormalidade..."
+               onkeydown="if(event.key==='Enter') doSearch()">
+        <button class="wiki-search-btn" onclick="doSearch()">⌕</button>
+      </div>
+
+      <nav class="wiki-header-nav">
+        <a id="tab-home"    onclick="showHome()"                   class="active">Início</a>
+        <a id="tab-list"    onclick="loadPage('listar.jsp')">Anormalidades</a>
+        <a id="tab-filter"  onclick="loadPage('filtrar.jsp')">Filtrar</a>
+        <a id="tab-form"    onclick="loadPage('form.jsp')">Gestão</a>
+      </nav>
     </div>
   </header>
 
-  <!-- SIDEBAR -->
-  <nav class="sidebar">
-    <div class="sidebar-logo">
-      <div class="logo-title">Lobotomy Corp</div>
-      <div class="logo-sub">Abnormality Archive</div>
+  <!-- BODY -->
+  <div class="wiki-body">
+
+    <!-- LEFT SIDEBAR -->
+    <aside class="wiki-sidebar">
+
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">Navegação</div>
+        <button class="sidebar-link active" id="sl-home" onclick="showHome()">
+          <span class="link-icon">⌂</span> Página Inicial
+        </button>
+        <button class="sidebar-link" id="sl-list" onclick="loadPage('listar.jsp')">
+          <span class="link-icon">☰</span> Todas as Anormalidades
+        </button>
+        <button class="sidebar-link" id="sl-filter" onclick="loadPage('filtrar.jsp')">
+          <span class="link-icon">⚙</span> Filtrar / Pesquisar
+        </button>
+        <button class="sidebar-link" id="sl-form" onclick="loadPage('form.jsp')">
+          <span class="link-icon">＋</span> Adicionar / Editar
+        </button>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">Por Nível de Risco</div>
+        <button class="sidebar-risk-item" onclick="loadPage('filtrar.jsp?riskLevel=Zayin')">
+          <span class="risk-dot" style="background:#27ae60"></span> Zayin
+        </button>
+        <button class="sidebar-risk-item" onclick="loadPage('filtrar.jsp?riskLevel=Teth')">
+          <span class="risk-dot" style="background:#3498db"></span> Teth
+        </button>
+        <button class="sidebar-risk-item" onclick="loadPage('filtrar.jsp?riskLevel=He')">
+          <span class="risk-dot" style="background:#f39c12"></span> He
+        </button>
+        <button class="sidebar-risk-item" onclick="loadPage('filtrar.jsp?riskLevel=Waw')">
+          <span class="risk-dot" style="background:#e74c3c"></span> Waw
+        </button>
+        <button class="sidebar-risk-item" onclick="loadPage('filtrar.jsp?riskLevel=Aleph')">
+          <span class="risk-dot" style="background:#9b59b6"></span> Aleph
+        </button>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">Por Tipo de Ataque</div>
+        <button class="sidebar-risk-item" onclick="loadPage('filtrar.jsp?attackType=Black')">
+          <span class="risk-dot" style="background:#666"></span> Black
+        </button>
+        <button class="sidebar-risk-item" onclick="loadPage('filtrar.jsp?attackType=White')">
+          <span class="risk-dot" style="background:#ccc"></span> White
+        </button>
+        <button class="sidebar-risk-item" onclick="loadPage('filtrar.jsp?attackType=Red')">
+          <span class="risk-dot" style="background:#e74c3c"></span> Red
+        </button>
+        <button class="sidebar-risk-item" onclick="loadPage('filtrar.jsp?attackType=Pale')">
+          <span class="risk-dot" style="background:#00d4d4"></span> Pale
+        </button>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">Especial</div>
+        <button class="sidebar-risk-item" onclick="loadPage('filtrar.jsp?facilityBenefit=1')">
+          <span style="color:var(--accent-yellow)">★</span> Com Benefício
+        </button>
+      </div>
+
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="wiki-main">
+
+      <!-- HERO (visível na página home) -->
+      <section class="wiki-hero" id="wiki-hero">
+        <div class="wiki-hero-bg"></div>
+        <div class="wiki-hero-grid"></div>
+        <div class="wiki-hero-content">
+          <div class="wiki-hero-badge">// SISTEMA DE CONTENÇÃO ACTIVO //</div>
+          <h1 class="wiki-hero-title">LOBOTOMY<br>CORPORATION</h1>
+          <p class="wiki-hero-sub">Abnormality Database</p>
+          <div class="wiki-hero-actions">
+            <button class="btn btn-primary" onclick="loadPage('listar.jsp')">☣ Ver Anormalidades</button>
+            <button class="btn btn-secondary" onclick="loadPage('filtrar.jsp')">⚙ Filtrar</button>
+            <button class="btn btn-secondary" onclick="loadPage('form.jsp')">＋ Adicionar</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- TABS DE NAVEGAÇÃO -->
+      <div class="wiki-tabs" id="wiki-tabs">
+        <button class="wiki-tab active" id="wt-home"   onclick="showHome()">Início</button>
+        <button class="wiki-tab" id="wt-list"   onclick="loadPage('listar.jsp')">Anormalidades</button>
+        <button class="wiki-tab" id="wt-filter" onclick="loadPage('filtrar.jsp')">Filtrar</button>
+        <button class="wiki-tab" id="wt-form"   onclick="loadPage('form.jsp')">Gestão CRUD</button>
+      </div>
+
+      <!-- HOME CONTENT (visível por defeito) -->
+      <div class="wiki-home-content" id="home-content">
+
+        <div class="stats-bar">
+          <div class="stat-box"><span class="num" id="stat-total">—</span><span class="lbl">Anormalidades</span></div>
+          <div class="stat-box"><span class="num">5</span><span class="lbl">Níveis de Risco</span></div>
+          <div class="stat-box"><span class="num">4</span><span class="lbl">Tipos de Ataque</span></div>
+          <div class="stat-box"><span class="num">4</span><span class="lbl">Páginas JSP</span></div>
+        </div>
+
+        <div class="lore-quote">
+          "Chamamos-lhes Anormalidades. Seres de natureza desconhecida, contidos nas profundezas
+          da nossa instalação. Cada uma delas guarda um segredo. Cada uma delas espera, observa,
+          e um dia... talvez responda."
+          <cite>— Arquivos Internos da Lobotomy Corporation, Vol. I</cite>
+        </div>
+
+        <div style="margin-bottom:20px;">
+          <h2 class="section-title">Sobre a Wiki</h2>
+        </div>
+
+        <div class="wiki-info-grid">
+          <div class="wiki-info-card">
+            <h3>☰ Anormalidades</h3>
+            <p>Consulta a base de dados completa de todas as Anormalidades contidas nas instalações.
+               Visualiza stats, nível de risco, tipo de dano e muito mais.</p>
+          </div>
+          <div class="wiki-info-card">
+            <h3>⚙ Filtrar</h3>
+            <p>Pesquisa avançada por múltiplos critérios cumulativos: nome, nível de risco, tipo de
+               ataque, benefício para a instalação e intervalo de E-Boxes.</p>
+          </div>
+          <div class="wiki-info-card">
+            <h3>＋ Gestão de Dados</h3>
+            <p>Inserir novas Anormalidades, actualizar registos existentes ou remover entradas
+               da base de dados MySQL através do formulário JSP.</p>
+          </div>
+          <div class="wiki-info-card">
+            <h3>⚠ Sistema EGO</h3>
+            <p>Cada Anormalidade pode gerar equipamentos EGO — armas e armaduras que os agentes
+               equipam para missões no interior das instalações.</p>
+          </div>
+        </div>
+
+        <div style="margin-bottom:16px;">
+          <h2 class="section-title">Níveis de Risco</h2>
+        </div>
+
+        <table class="risk-table">
+          <thead>
+            <tr>
+              <th>Designação</th>
+              <th>Letra Hebraica</th>
+              <th>Nível de Perigo</th>
+              <th>Protocolo</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span style="color:#27ae60;font-weight:700">Zayin ז</span></td>
+              <td style="font-family:var(--font-mono);font-size:.8rem;color:var(--text-muted)">7</td>
+              <td>Baixo Risco</td>
+              <td>Contenção Standard</td>
+            </tr>
+            <tr>
+              <td><span style="color:#3498db;font-weight:700">Teth ט</span></td>
+              <td style="font-family:var(--font-mono);font-size:.8rem;color:var(--text-muted)">9</td>
+              <td>Risco Moderado</td>
+              <td>Vigilância Reforçada</td>
+            </tr>
+            <tr>
+              <td><span style="color:#f39c12;font-weight:700">He ה</span></td>
+              <td style="font-family:var(--font-mono);font-size:.8rem;color:var(--text-muted)">5</td>
+              <td>Alto Risco</td>
+              <td>Equipa Especializada</td>
+            </tr>
+            <tr>
+              <td><span style="color:#e74c3c;font-weight:700">Waw ו</span></td>
+              <td style="font-family:var(--font-mono);font-size:.8rem;color:var(--text-muted)">6</td>
+              <td>Risco Muito Alto</td>
+              <td>Protocolo de Emergência</td>
+            </tr>
+            <tr>
+              <td><span style="color:#9b59b6;font-weight:700">Aleph א</span></td>
+              <td style="font-family:var(--font-mono);font-size:.8rem;color:var(--text-muted)">1</td>
+              <td>Risco Extremo</td>
+              <td>Contenção Máxima / SUPRESSÃO</td>
+            </tr>
+          </tbody>
+        </table>
+
+      </div>
+
+      <!-- IFRAME (oculto inicialmente, activo ao navegar) -->
+      <iframe id="wiki-iframe" src="" style="display:none;"
+              onload="adjustHeight()"></iframe>
+
+    </main>
+
+    <!-- RIGHT SIDEBAR -->
+    <aside class="wiki-right-sidebar">
+      <div class="right-section">
+        <div class="right-section-title">Acesso Rápido</div>
+        <button class="right-item" onclick="loadPage('listar.jsp')">☰ Listar Tudo</button>
+        <button class="right-item" onclick="loadPage('form.jsp')">＋ Novo Registo</button>
+        <button class="right-item" onclick="loadPage('filtrar.jsp')">⚙ Pesquisar</button>
+      </div>
+      <div class="right-section">
+        <div class="right-section-title">Tipos de Dano</div>
+        <button class="right-item" onclick="loadPage('filtrar.jsp?attackType=Black')">⬛ Black Damage</button>
+        <button class="right-item" onclick="loadPage('filtrar.jsp?attackType=White')">⬜ White Damage</button>
+        <button class="right-item" onclick="loadPage('filtrar.jsp?attackType=Red')">🔴 Red Damage</button>
+        <button class="right-item" onclick="loadPage('filtrar.jsp?attackType=Pale')">💠 Pale Damage</button>
+      </div>
+      <div class="right-section">
+        <div class="right-section-title">Riscos Extremos</div>
+        <button class="right-item" onclick="loadPage('filtrar.jsp?riskLevel=Aleph')">
+          <span style="color:#9b59b6">▲</span> Ver Aleph
+        </button>
+        <button class="right-item" onclick="loadPage('filtrar.jsp?riskLevel=Waw')">
+          <span style="color:#e74c3c">▲</span> Ver Waw
+        </button>
+      </div>
+      <div class="right-section">
+        <div class="right-section-title">Base de Dados</div>
+        <div class="right-item" style="cursor:default;font-family:var(--font-mono);font-size:0.7rem;color:var(--text-dim);">
+          MySQL 8.0
+        </div>
+        <div class="right-item" style="cursor:default;font-family:var(--font-mono);font-size:0.7rem;color:var(--text-dim);">
+          JSP / Jakarta EE
+        </div>
+        <div class="right-item" style="cursor:default;font-family:var(--font-mono);font-size:0.7rem;color:var(--text-dim);">
+          Apache Tomcat 10
+        </div>
+      </div>
+    </aside>
+
+  </div><!-- .wiki-body -->
+
+  <!-- FOOTER -->
+  <footer class="wiki-footer">
+    <div class="wiki-footer-inner">
+      <div>
+        <h4>Lobotomy Corp. Wiki</h4>
+        <p style="font-size:.8rem;color:var(--text-dim);line-height:1.7;">
+          Base de dados de Anormalidades do jogo Lobotomy Corporation (ProjectMoon).
+          Projeto académico — JSP + MySQL.
+        </p>
+      </div>
+      <div>
+        <h4>Navegação</h4>
+        <a href="#" onclick="showHome();return false;">Página Inicial</a>
+        <a href="#" onclick="loadPage('listar.jsp');return false;">Listar Anormalidades</a>
+        <a href="#" onclick="loadPage('filtrar.jsp');return false;">Filtrar</a>
+        <a href="#" onclick="loadPage('form.jsp');return false;">Gestão CRUD</a>
+      </div>
+      <div>
+        <h4>Níveis de Risco</h4>
+        <a href="#" onclick="loadPage('filtrar.jsp?riskLevel=Zayin');return false;">Zayin — Baixo</a>
+        <a href="#" onclick="loadPage('filtrar.jsp?riskLevel=Teth');return false;">Teth — Moderado</a>
+        <a href="#" onclick="loadPage('filtrar.jsp?riskLevel=He');return false;">He — Alto</a>
+        <a href="#" onclick="loadPage('filtrar.jsp?riskLevel=Waw');return false;">Waw — Muito Alto</a>
+        <a href="#" onclick="loadPage('filtrar.jsp?riskLevel=Aleph');return false;">Aleph — Extremo</a>
+      </div>
+      <div>
+        <h4>Tipos de Dano</h4>
+        <a href="#" onclick="loadPage('filtrar.jsp?attackType=Black');return false;">Black</a>
+        <a href="#" onclick="loadPage('filtrar.jsp?attackType=White');return false;">White</a>
+        <a href="#" onclick="loadPage('filtrar.jsp?attackType=Red');return false;">Red</a>
+        <a href="#" onclick="loadPage('filtrar.jsp?attackType=Pale');return false;">Pale</a>
+      </div>
     </div>
-
-    <div class="sidebar-section">
-      <div class="sidebar-section-label">Navigation</div>
-      <a onclick="load('home.jsp')" class="active" id="nav-home">
-        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path d="M3 12l9-9 9 9M5 10v10h5v-5h4v5h5V10"/>
-        </svg>
-        Home
-      </a>
-      <a onclick="load('abnormalities.jsp')" id="nav-all">
-        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
-        </svg>
-        All Abnormalities
-      </a>
-      <a onclick="load('pesquisa.jsp')" id="nav-search">
-        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-        </svg>
-        Search
-      </a>
-      <a onclick="load('inserir.jsp')" id="nav-add">
-        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/>
-        </svg>
-        Add Abnormality
-      </a>
+    <div class="wiki-footer-bottom">
+      <p>© 2026 — Lobotomy Corporation Wiki — Projeto Académico</p>
+      <p>HTML + CSS + Java + JSP + MySQL</p>
     </div>
+  </footer>
 
-    <div class="sidebar-divider"></div>
+</div><!-- .wiki-root -->
 
-    <div class="sidebar-section">
-      <div class="sidebar-section-label">Filter by Risk</div>
-    </div>
-    <div class="risk-filters">
-      <a class="risk-link" onclick="load('abnormalities.jsp?risk=ZAYIN')">
-        <span class="risk-dot" style="background:var(--zayin)"></span> ZAYIN
-      </a>
-      <a class="risk-link" onclick="load('abnormalities.jsp?risk=TETH')">
-        <span class="risk-dot" style="background:var(--teth)"></span> TETH
-      </a>
-      <a class="risk-link" onclick="load('abnormalities.jsp?risk=HE')">
-        <span class="risk-dot" style="background:var(--he)"></span> HE
-      </a>
-      <a class="risk-link" onclick="load('abnormalities.jsp?risk=WAW')">
-        <span class="risk-dot" style="background:var(--waw)"></span> WAW
-      </a>
-      <a class="risk-link" onclick="load('abnormalities.jsp?risk=ALEPH')">
-        <span class="risk-dot" style="background:var(--aleph)"></span> ALEPH
-      </a>
-    </div>
+<script>
+  // ── RELÓGIO ──────────────────────────────────────────────
+  function updateClock() {
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2,'0');
+    const m = String(now.getMinutes()).padStart(2,'0');
+    const s = String(now.getSeconds()).padStart(2,'0');
+    document.getElementById('clock').textContent =
+      now.toLocaleDateString('pt-PT') + ' ' + h + ':' + m + ':' + s;
+  }
+  setInterval(updateClock, 1000);
+  updateClock();
 
-    <div class="sidebar-footer">
-      Lobotomy Corporation Wiki<br>
-      Fan Database Project
-    </div>
-  </nav>
+  // ── ESTADO ACTIVO ─────────────────────────────────────────
+  const tabIds    = ['home','list','filter','form'];
+  const sideIds   = ['sl-home','sl-list','sl-filter','sl-form'];
+  const headerIds = ['tab-home','tab-list','tab-filter','tab-form'];
+  const wtIds     = ['wt-home','wt-list','wt-filter','wt-form'];
 
-  <!-- IFRAME CONTENT -->
-  <iframe id="frame" name="frame" src="home.jsp"></iframe>
+  function setActive(idx) {
+    tabIds.forEach((_,i) => {
+      const active = i === idx;
+      document.getElementById(sideIds[i])  .classList.toggle('active', active);
+      document.getElementById(headerIds[i]).classList.toggle('active', active);
+      document.getElementById(wtIds[i])    .classList.toggle('active', active);
+    });
+  }
 
-  <script>
-    function load(page) {
-      document.getElementById('frame').src = page;
-      // update active state
-      ['home','all','search','add'].forEach(id => {
-        document.getElementById('nav-' + id)?.classList.remove('active');
-      });
-      if (page.startsWith('home'))              document.getElementById('nav-home')?.classList.add('active');
-      else if (page.startsWith('abnormalities')) document.getElementById('nav-all')?.classList.add('active');
-      else if (page.startsWith('pesquisa'))      document.getElementById('nav-search')?.classList.add('active');
-      else if (page.startsWith('inserir'))       document.getElementById('nav-add')?.classList.add('active');
+  // ── MOSTRAR HOME ─────────────────────────────────────────
+  function showHome() {
+    setActive(0);
+    document.getElementById('wiki-hero').style.display    = 'flex';
+    document.getElementById('home-content').style.display = 'block';
+    document.getElementById('wiki-iframe').style.display  = 'none';
+    document.getElementById('wiki-iframe').src            = '';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // ── CARREGAR JSP NO IFRAME ───────────────────────────────
+  function loadPage(url) {
+    // Determinar índice da tab activa
+    const map = {
+      'listar.jsp': 1,
+      'filtrar.jsp': 2,
+      'form.jsp': 3
+    };
+    // Suporte a URLs com query string (ex: filtrar.jsp?riskLevel=Zayin)
+    const base = url.split('?')[0];
+    const idx  = map[base] !== undefined ? map[base] : 1;
+    setActive(idx);
+
+    document.getElementById('wiki-hero').style.display    = 'none';
+    document.getElementById('home-content').style.display = 'none';
+
+    const iframe = document.getElementById('wiki-iframe');
+    iframe.style.display = 'block';
+    iframe.src = url;
+
+    // Scroll suave até às tabs
+    document.getElementById('wiki-tabs').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // ── AJUSTE AUTOMÁTICO DA ALTURA DO IFRAME ────────────────
+  function adjustHeight() {
+    const iframe = document.getElementById('wiki-iframe');
+    try {
+      const h = iframe.contentWindow.document.body.scrollHeight;
+      iframe.style.height = (h + 40) + 'px';
+    } catch(e) {
+      // cross-origin — manter altura mínima
+      iframe.style.height = '800px';
     }
-  </script>
+  }
+
+  // Redimensionamento automático
+  window.addEventListener('resize', adjustHeight);
+
+  // ── PESQUISA ─────────────────────────────────────────────
+  function doSearch() {
+    const q = document.getElementById('searchInput').value.trim();
+    if (q) {
+      loadPage('filtrar.jsp?nome=' + encodeURIComponent(q));
+    }
+  }
+
+  // ── CARREGAR TOTAL DA BD (iframe silencioso) ──────────────
+  // Tentativa de ler o total via fetch do listar.jsp
+  // Se o servidor não estiver disponível, mostra "—"
+  fetch('listar.jsp')
+    .then(r => r.text())
+    .then(html => {
+      const m = html.match(/Total de registos:.*?(\d+)/);
+      if (m) document.getElementById('stat-total').textContent = m[1];
+    })
+    .catch(() => {});
+</script>
+
 </body>
 </html>
