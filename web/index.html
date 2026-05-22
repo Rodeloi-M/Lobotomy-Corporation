@@ -575,14 +575,22 @@
       .wiki-header-nav { display: none; }
       .wiki-search { max-width: 200px; }
     }
-  </style>
+    /* Logo SVG no index */
+  .wiki-logo-hex img,
+  .wiki-logo .logo-img {
+    width: 40px;
+    height: 40px;
+    filter: drop-shadow(0 0 8px rgba(245,197,24,.5));
+    animation: pulse-hex 3s ease-in-out infinite;
+  }
+</style>
 </head>
 <body>
 <div class="wiki-root">
 
   <!-- TOP BAR -->
   <div class="topbar">
-    <span>☣ LOBOTOMY CORP. INTERNAL NETWORK</span>
+    <span>⬡ LOBOTOMY CORP. INTERNAL NETWORK</span>
     <span class="sep">|</span>
     <a href="#" onclick="loadPage('listar.jsp');return false;">Base de Dados</a>
     <span class="sep">|</span>
@@ -596,7 +604,7 @@
   <header class="wiki-header">
     <div class="wiki-header-inner">
       <a href="index.html" class="wiki-logo" onclick="showHome();return false;">
-        <div class="wiki-logo-hex">☣</div>
+        <img src="images/logo.svg" alt="L Corp" class="logo-img" style="width:40px;height:40px;filter:drop-shadow(0 0 8px rgba(245,197,24,.5))">
         <div class="wiki-logo-text">
           <div class="wiki-logo-name">Lobotomy Corp.</div>
           <div class="wiki-logo-sub">Abnormality Wiki</div>
